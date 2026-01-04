@@ -19,13 +19,13 @@ def generate(prompt:str,uncond_prompt:str, #uncond_prompt or negative prompt you
                     raise ValueError("strength must be between 0 and 1")
 
                 if idle_device:
-                    to_idle: lambda x: x.to(device)
+                    to_idle = lambda x: x.to(idle_device)
                 else:
                     to_idle = lambda x: x
                 
                 generator = torch.Generator(device=device)
                 if seed is None:
-                    generate.seed()
+                    generator.seed()
                 else:
                     generator.manual_seed(seed)
                 
@@ -51,7 +51,7 @@ def generate(prompt:str,uncond_prompt:str, #uncond_prompt or negative prompt you
                 
                 if sampler_name == "ddpm":
                     sampler = DDPMSampler(generator)
-                    sampler.set_inference_step
+                    sampler.set_inference_timesteps(n_inference_steps)
                 else:
                     raise ValueError("Invalid sampler name")
 
@@ -92,7 +92,7 @@ def generate(prompt:str,uncond_prompt:str, #uncond_prompt or negative prompt you
                 to_idle(diffusion)
                 decoder = models["decoder"]
                 decoder.to(device)
-                images = sampler.decode(latents)
+                images = decoder(latents)
                 to_idle(decoder)
                 images = rescale(images,(-1,1),(0,255),clamp=True)
                 images = images.permute(0,2,3,1)

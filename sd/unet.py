@@ -15,7 +15,7 @@ class SwitchSequential(nn.Sequential):
         return x
 
 class UNET_ResidualBlock(nn.Module):
-    def ___init__(self,in_channels:int,out_channels:int,n_time=1280):
+    def __init__(self,in_channels:int,out_channels:int,n_time=1280):
         super().__init__()
         self.groupnorm_feature = nn.GroupNorm(32,in_channels)
         self.conv_feature = nn.Conv2d(in_channels,out_channels,kernel_size=3,padding=1)
@@ -45,7 +45,7 @@ class UNET_ResidualBlock(nn.Module):
         return merged + residual
 
 class UNET_AttentionBlock(nn.Module):
-    def ___init__(self,n_heads:int,n_embed:int,d_context:int):
+    def __init__(self,n_heads:int,n_embed:int,d_context=768):
         super(UNET_AttentionBlock,self).__init__()
         channels = n_heads * n_embed
         self.groupnorm = nn.GroupNorm(32,channels,eps=1e-6)
@@ -113,7 +113,7 @@ class UNET_OutputLayer(nn.Module):
 class UNET(nn.Module):
     def __init__(self):
         super(UNET,self).__init__()
-        self.encoders = nn.Module([
+        self.encoders = nn.ModuleList([
             SwitchSequential(nn.Conv2d(4,320,kernel_size=3,padding=1)),
             SwitchSequential(UNET_ResidualBlock(320,320),UNET_AttentionBlock(8,40)),
             SwitchSequential(UNET_ResidualBlock(320,320),UNET_AttentionBlock(8,40)),
@@ -133,7 +133,7 @@ class UNET(nn.Module):
             UNET_AttentionBlock(8,160),
             UNET_ResidualBlock(1280,1280), 
         )
-        self.decoder = nn.ModuleList([
+        self.decoders = nn.ModuleList([
             SwitchSequential(UNET_ResidualBlock(2560,1280)),
             SwitchSequential(UNET_ResidualBlock(2560,1280)),
             SwitchSequential(UNET_ResidualBlock(2560,1280),UpSample(1280)),
@@ -144,6 +144,25 @@ class UNET(nn.Module):
             SwitchSequential(UNET_ResidualBlock(1280,640),UNET_AttentionBlock(8,80)),
             SwitchSequential(UNET_ResidualBlock(960,640),UNET_AttentionBlock(8,80),UpSample(640)),
             SwitchSequential(UNET_ResidualBlock(960,320),UNET_AttentionBlock(8,40)),
-            SwitchSequential(UNET_ResidualBlock(640,320),UNET_AttentionBlock(8,40)),#check this
+            SwitchSequential(UNET_ResidualBlock(640,320),UNET_AttentionBlock(8,40)),
             SwitchSequential(UNET_ResidualBlock(640,320),UNET_AttentionBlock(8,40)),
         ])
+    
+    def forward(self, x, context, time):
+        # x: (Batch, 4, H/8, W/8)
+        # context: (Batch, Seq_Len, Dim)
+        # time: (1, 1280)
+        
+        skip_connections = []
+        for layers in self.encoders:
+            x = layers(x, context, time)
+            skip_connections.append(x)
+        
+        x = self.bottleneck(x, context, time)
+        
+        for layers in self.decoders:
+            # Concatenate with skip connection
+            x = torch.cat((x, skip_connections.pop()), dim=1)
+            x = layers(x, context, time)
+        
+        return x
