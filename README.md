@@ -5,7 +5,7 @@ A complete implementation of Stable Diffusion v1.5 built from scratch using PyTo
 ![Stable Diffusion Architecture](https://img.shields.io/badge/PyTorch-EE4C2C?style=for-the-badge&logo=pytorch&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green?style=for-the-badge)
-
+![Stabel_diffusion_weights](https://drive.google.com/file/d/1cApM0w3mnNT-ogJ8HjyDDheS9rMCT77B/view?usp=sharing)
 ## 📖 Overview
 
 Stable Diffusion is a latent text-to-image diffusion model capable of generating photorealistic images from text prompts. This implementation covers all core components:
@@ -198,9 +198,20 @@ image = generate(
 
 ## 📚 References
 
-- [Stable Diffusion Paper](https://arxiv.org/abs/2112.10752)
-- [DDPM Paper](https://arxiv.org/abs/2006.11239)
-- [CLIP Paper](https://arxiv.org/abs/2103.00020)
+### Research Papers
+
+| Paper | Authors | Link |
+|-------|---------|------|
+| **High-Resolution Image Synthesis with Latent Diffusion Models** (Stable Diffusion) | Rombach et al., 2022 | [arXiv:2112.10752](https://arxiv.org/abs/2112.10752) |
+| **Denoising Diffusion Probabilistic Models** (DDPM) | Ho et al., 2020 | [arXiv:2006.11239](https://arxiv.org/abs/2006.11239) |
+| **Learning Transferable Visual Models From Natural Language Supervision** (CLIP) | Radford et al., 2021 | [arXiv:2103.00020](https://arxiv.org/abs/2103.00020) |
+
+### Libraries & Resources
+
+- 🤗 **[Hugging Face Diffusers](https://huggingface.co/docs/diffusers)** - State-of-the-art diffusion models library
+- 🔥 **[PyTorch](https://pytorch.org/)** - Deep learning framework
+- 📦 **[CompVis/stable-diffusion](https://github.com/CompVis/stable-diffusion)** - Original Stable Diffusion repository
+- 🧠 **[OpenAI CLIP](https://github.com/openai/CLIP)** - Contrastive Language-Image Pre-training
 
 ## 📝 License
 
